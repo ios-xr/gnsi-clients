@@ -190,6 +190,150 @@ Error: x509: certificate signed by unknown authority
      openssl pkcs7 -print_certs -text -noout
    ```
 
+### Error: "certificate has expired" or "certificate is not yet valid"
+
+**Symptoms:**
+```
+Error: x509: certificate has expired or is not yet valid
+```
+
+**Causes:**
+- Server certificate expired
+- Client certificate expired
+- System clock not synchronized
+
+**Solutions:**
+
+1. **Check certificate validity:**
+   ```bash
+   # Check server certificate
+   openssl s_client -connect router.example.com:57400 -showcerts
+   
+   # Check client certificate
+   openssl x509 -in client-cert.pem -noout -dates
+   ```
+
+2. **Verify system time:**
+   ```bash
+   date
+   # Sync if needed
+   ntpdate -u pool.ntp.org
+   ```
+
+3. **Renew expired certificates**
+
+### Error: "certificate name does not match"
+
+**Symptoms:**
+```
+Error: x509: certificate is valid for ems.cisco.com, not router.example.com
+```
+
+**Cause:**
+The `-target_name` doesn't match the server certificate's CN or SAN
+
+**Solutions:**
+
+1. **Use correct target name:**
+   ```bash
+   # Must match certificate CN or SAN
+   -target_name ems.cisco.com
+   ```
+
+2. **Check server certificate details:**
+   ```bash
+   openssl s_client -connect 192.168.1.1:57400 -showcerts | \
+     openssl x509 -noout -text | grep -A2 "Subject:\|DNS:"
+   ```
+
+3. **Use insecure mode for testing (not production):**
+   ```bash
+   -insecure_skip_verify
+   ```
+
+### Error: "bad certificate" (mTLS)
+
+**Symptoms:**
+```
+Error: remote error: tls: bad certificate
+Error: tls: bad certificate
+```
+
+**Cause:**
+Server rejected the client certificate during mTLS handshake
+
+**Common Reasons:**
+
+1. **Client certificate not trusted by server:**
+   - Server doesn't have the CA that signed your client cert
+   - Certificate chain incomplete
+
+2. **Client certificate expired or not yet valid**
+
+3. **Client private key doesn't match certificate**
+
+4. **Certificate revoked (in server's CRL)**
+
+**Solutions:**
+
+1. **Verify client certificate is trusted:**
+   ```bash
+   # Check if server has your CA certificate configured
+   # On IOS XR: show crypto ca certificates
+   ```
+
+2. **Check certificate validity:**
+   ```bash
+   openssl x509 -in client-cert.pem -noout -dates -subject -issuer
+   ```
+
+3. **Verify key matches certificate:**
+   ```bash
+   # Compare modulus
+   openssl x509 -noout -modulus -in client-cert.pem | openssl md5
+   openssl rsa -noout -modulus -in client-key.pem | openssl md5
+   # Should output the same hash
+   ```
+
+4. **Ensure certificate chain is complete:**
+   ```bash
+   # If using intermediate CAs, include them in client-cert.pem
+   # Order: Leaf cert first, then intermediates
+   ```
+
+5. **Try without client cert to isolate issue:**
+   ```bash
+   # Remove -client_cert and -client_key flags
+   # Use only -username and -password
+   # If this works, issue is with client certificate
+   ```
+
+### Error: "tls: handshake failure"
+
+**Symptoms:**
+```
+Error: remote error: tls: handshake failure
+```
+
+**Causes:**
+- TLS version mismatch
+- Cipher suite mismatch
+- Certificate issues
+
+**Solutions:**
+
+1. **Check TLS configuration on server**
+
+2. **Verify certificate is valid:**
+   ```bash
+   openssl x509 -in cert.pem -text -noout
+   ```
+
+3. **Test TLS connection:**
+   ```bash
+   openssl s_client -connect 192.168.1.1:57400 -tls1_2
+   ```
+
 ## Certificate Problems
 
 ### Error: "failed to load client certificate"

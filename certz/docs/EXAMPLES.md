@@ -376,58 +376,13 @@ Rotate using device's built-in IDevID certificate:
 ```
 
 **With `-validate` flag:**
-- After upload, client attempts gNMI GetCapabilities to verify connectivity
+- After upload, client attempts CanGenerateCSR to verify connectivity
 - If successful → automatically sends FinalizeRequest
 - If fails → cancels stream, device rolls back to previous certificates
 
 **Without `-validate` flag:**
 - Immediately sends FinalizeRequest after upload
 - Faster, but no pre-commit validation
-
-### Manual Finalize Decision
-
-For interactive validation, you can run separate commands:
-
-```bash
-# Step 1: Rotate (uploads but doesn't finalize)
-./certz_client \
-  -target_addr 192.168.1.1:57400 \
-  -target_name router.example.com \
-  -client_cert client.pem \
-  -client_key client_key.pem \
-  -ca_cert ca.pem \
-  -op rotate \
-  -profile_id my_service \
-  -cert_file new_cert.pem \
-  -key_file new_key.pem \
-  -no_finalize \
-  -v
-
-# Step 2: Manually test the connection
-# ... test your application connections ...
-
-# Step 3: Finalize (if tests passed)
-./certz_client \
-  -target_addr 192.168.1.1:57400 \
-  -target_name router.example.com \
-  -client_cert client.pem \
-  -client_key client_key.pem \
-  -ca_cert ca.pem \
-  -op finalize \
-  -profile_id my_service \
-  -v
-
-# OR Step 3: Rollback (if tests failed)
-./certz_client \
-  -target_addr 192.168.1.1:57400 \
-  -target_name router.example.com \
-  -client_cert client.pem \
-  -client_key client_key.pem \
-  -ca_cert ca.pem \
-  -op rollback \
-  -profile_id my_service \
-  -v
-```
 
 ## IOS XR Specific Examples
 

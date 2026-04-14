@@ -9,7 +9,7 @@ Complete examples showing how to use the certz client for certificate management
 - [Certificate Rotation Examples](#certificate-rotation-examples)
 - [Validation and Finalize Pattern](#validation-and-finalize-pattern)
 - [IOS XR Specific Examples](#ios-xr-specific-examples)
-- [Advanced Use Cases](#advanced-use-cases)
+- [Additional Examples](#additional-examples)
 
 ## Quick Start Examples
 
@@ -376,7 +376,7 @@ Rotate using device's built-in IDevID certificate:
 ```
 
 **With `-validate` flag:**
-- After upload, client attempts CanGenerateCSR to verify connectivity
+- After upload, client calls CanGenerateCSR to verify device connectivity
 - If successful → automatically sends FinalizeRequest
 - If fails → cancels stream, device rolls back to previous certificates
 
@@ -441,7 +441,7 @@ Rotate using device's built-in IDevID certificate:
   -op get-profile-list
 ```
 
-## Advanced Use Cases
+## Additional Examples
 
 ### Check CSR Generation Capability
 

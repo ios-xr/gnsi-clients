@@ -232,22 +232,6 @@ Suitable for most operations
 # 5. If failure → cancels rotation (automatic rollback)
 ```
 
-### Validation Strategy
-
-```bash
-# Step 1: Rotate with validation
-./certz_client -op rotate \
-  -profile_id production-profile \
-  -cert_file new-cert.pem \
-  -key_file new-key.pem \
-  -ca_bundle_file new-ca.pem \
-  -validate \
-  -v
-
-# Step 2: Verify profile (after successful rotation)
-./certz_client -op get-profile-list -v
-```
-
 ## Version Management
 
 ### Semantic Versioning for Certificates
